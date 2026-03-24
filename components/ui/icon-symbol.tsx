@@ -9,21 +9,72 @@ type IconMapping = Record<SymbolViewProps["name"], ComponentProps<typeof Materia
 type IconSymbolName = keyof typeof MAPPING;
 
 /**
- * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
+ * SF Symbols to Material Icons mappings for FeedbackIQ
  */
 const MAPPING = {
+  // Navigation
   "house.fill": "home",
+  "doc.text.fill": "description",
+  "chart.bar.fill": "bar-chart",
+  "gearshape.fill": "settings",
+  // Actions
   "paperplane.fill": "send",
-  "chevron.left.forwardslash.chevron.right": "code",
+  "plus": "add",
+  "plus.circle.fill": "add-circle",
+  "pencil": "edit",
+  "trash": "delete",
+  "trash.fill": "delete",
+  "square.and.arrow.up": "share",
+  "square.and.arrow.up.fill": "share",
+  "doc.on.doc": "content-copy",
+  "checkmark": "check",
+  "checkmark.circle.fill": "check-circle",
+  "xmark": "close",
+  "xmark.circle.fill": "cancel",
   "chevron.right": "chevron-right",
-} as IconMapping;
+  "chevron.left": "chevron-left",
+  "chevron.left.forwardslash.chevron.right": "code",
+  "chevron.down": "expand-more",
+  "chevron.up": "expand-less",
+  // Content
+  "star.fill": "star",
+  "star": "star-outline",
+  "heart.fill": "favorite",
+  "bubble.left.fill": "chat-bubble",
+  "person.fill": "person",
+  "tag.fill": "label",
+  "tag": "label-outline",
+  "magnifyingglass": "search",
+  "bell.fill": "notifications",
+  "bell": "notifications-none",
+  "qrcode": "qr-code",
+  "link": "link",
+  "arrow.down.to.line": "download",
+  "arrow.up.from.line": "upload",
+  "clock.fill": "access-time",
+  "calendar": "calendar-today",
+  "chart.pie.fill": "pie-chart",
+  "chart.line.uptrend.xyaxis": "trending-up",
+  "arrow.clockwise": "refresh",
+  "info.circle": "info",
+  "info.circle.fill": "info",
+  "exclamationmark.triangle.fill": "warning",
+  "eye": "visibility",
+  "eye.slash": "visibility-off",
+  "ellipsis": "more-horiz",
+  "ellipsis.circle": "more-horiz",
+  "slider.horizontal.3": "tune",
+  "line.3.horizontal.decrease": "filter-list",
+  "arrow.right": "arrow-forward",
+  "arrow.left": "arrow-back",
+  "face.smiling": "sentiment-satisfied",
+  "face.smiling.fill": "sentiment-satisfied-alt",
+  "hand.thumbsup.fill": "thumb-up",
+  "hand.thumbsdown.fill": "thumb-down",
+} as unknown as IconMapping;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
  */
 export function IconSymbol({
   name,
