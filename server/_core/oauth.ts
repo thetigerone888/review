@@ -64,9 +64,11 @@ function buildUserResponse(
 
 export function registerOAuthRoutes(app: Express) {
   // Rate limiter for authentication endpoints to prevent brute-force / DoS
+  const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+  const AUTH_RATE_LIMIT_MAX = parseInt(process.env.AUTH_RATE_LIMIT_MAX || "100", 10);
   const authRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per window per IP
+    windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+    max: AUTH_RATE_LIMIT_MAX,
     standardHeaders: true,
     legacyHeaders: false,
   });
