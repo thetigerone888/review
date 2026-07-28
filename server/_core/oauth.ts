@@ -1,5 +1,6 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import type { Express, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import { getUserByOpenId, upsertUser } from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -62,6 +63,14 @@ function buildUserResponse(
 }
 
 export function registerOAuthRoutes(app: Express) {
+  // Rate limiter for authentication endpoints to prevent brute-force / DoS
+  const authRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per window per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
@@ -135,7 +144,7 @@ export function registerOAuthRoutes(app: Express) {
   });
 
   // Get current authenticated user - works with both cookie (web) and Bearer token (mobile)
-  app.get("/api/auth/me", async (req: Request, res: Response) => {
+  app.get("/api/auth/me", authRateLimiter, async (req: Request, res: Response) => {
     try {
       const user = await sdk.authenticateRequest(req);
       res.json({ user: buildUserResponse(user) });
@@ -148,7 +157,7 @@ export function registerOAuthRoutes(app: Express) {
   // Establish session cookie from Bearer token
   // Used by iframe preview: frontend receives token via postMessage, then calls this endpoint
   // to get a proper Set-Cookie response from the backend (3000-xxx domain)
-  app.post("/api/auth/session", async (req: Request, res: Response) => {
+  app.post("/api/auth/session", authRateLimiter, async (req: Request, res: Response) => {
     try {
       // Authenticate using Bearer token from Authorization header
       const user = await sdk.authenticateRequest(req);
