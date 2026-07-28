@@ -1,5 +1,6 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import type { Express, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import { getUserByOpenId, upsertUser } from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -62,6 +63,17 @@ function buildUserResponse(
 }
 
 export function registerOAuthRoutes(app: Express) {
+  // Rate limiter for authentication endpoints to prevent brute-force / DoS
+  const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+  const AUTH_RATE_LIMIT_MAX = parseInt(process.env.AUTH_RATE_LIMIT_MAX || "20", 10);
+  const authRateLimiter = rateLimit({
+    windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+    max: AUTH_RATE_LIMIT_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: "Too many authentication requests, please try again later.",
+  });
+
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
@@ -135,7 +147,7 @@ export function registerOAuthRoutes(app: Express) {
   });
 
   // Get current authenticated user - works with both cookie (web) and Bearer token (mobile)
-  app.get("/api/auth/me", async (req: Request, res: Response) => {
+  app.get("/api/auth/me", authRateLimiter, async (req: Request, res: Response) => {
     try {
       const user = await sdk.authenticateRequest(req);
       res.json({ user: buildUserResponse(user) });
@@ -148,7 +160,7 @@ export function registerOAuthRoutes(app: Express) {
   // Establish session cookie from Bearer token
   // Used by iframe preview: frontend receives token via postMessage, then calls this endpoint
   // to get a proper Set-Cookie response from the backend (3000-xxx domain)
-  app.post("/api/auth/session", async (req: Request, res: Response) => {
+  app.post("/api/auth/session", authRateLimiter, async (req: Request, res: Response) => {
     try {
       // Authenticate using Bearer token from Authorization header
       const user = await sdk.authenticateRequest(req);
